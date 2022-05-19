@@ -63,7 +63,6 @@ func Register(w http.ResponseWriter, r *http.Request){
 		log.Fatal(err)
 	}
 	var userRegister models.UserRegister
-	userRegister.UserId = uuid.New()
 	err_json := json.NewDecoder(r.Body).Decode(&userRegister)
 	if err_json != nil{
 		log.Fatal(err)
@@ -79,7 +78,7 @@ func Register(w http.ResponseWriter, r *http.Request){
 		w.Write(json)
 	}else{
 		var user models.User
-		user.UserId = userRegister.UserId
+		user.UserId = uuid.New()
 		user.UserFirstname = userRegister.UserFirstname
 		user.UserLastname = userRegister.UserLastname
 		user.UserAddress = userRegister.UserAddress

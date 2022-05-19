@@ -6,7 +6,6 @@ import (
 )
 
 type UserRegister struct {
-	UserId         uuid.UUID `json:"ID,omitempty"`
 	UserFirstname  string    `json:"userFirstname,omitempty" validate:"required,alpha"`
 	UserLastname   string    `json:"userLastname,omitempty" validate:"alpha"`
 	UserEmail      string    `json:"userEmail,omitempty" validate:"required,email"`
