@@ -8,7 +8,7 @@ import (
 )
 
 type Product struct {
-	ProductId    uuid.UUID `json:"ID,omitempty"`
+	ProductId    uuid.UUID `json:"ID,omitempty" validate:"uuid"`
 	UserId       uuid.UUID `json:"userId,omitempty" validate:"required"`
 	ProductName  string    `json:"productName,omitempty" validate:"required"`
 	ProductDesc  string    `json:"productDesc,omitempty"`

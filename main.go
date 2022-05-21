@@ -1,7 +1,7 @@
 package main
 
 import (
-	"belajar-golang/routers"
+	"tokokocak/routers"
 	"log"
 	"os"
 	"regexp"
@@ -9,7 +9,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const projectDirName = "belajar-golang"
+const projectDirName = "toko-kocak"
 func loadEnv() {
 	projectName := regexp.MustCompile(`^(.*` + projectDirName + `)`)
     currentWorkDirectory, _ := os.Getwd()

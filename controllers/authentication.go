@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"belajar_golang/helpers"
-	"belajar_golang/models"
+	"tokokocak/helpers"
+	"tokokocak/models"
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
@@ -20,19 +20,19 @@ func Hashing(text string) string {
 func Login(w http.ResponseWriter, r *http.Request){
 	db, err := helpers.Connection()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	var userLogin models.UserLogin
 	err_json := json.NewDecoder(r.Body).Decode(&userLogin)
 	if err_json != nil{
-		log.Fatal(err)
+		log.Println(err)
 	}
 	msg, isvalid := helpers.Validate(userLogin)
 	if isvalid == false{
 		response := helpers.InvalidResponse(400, msg)
 		json, err := json.Marshal(response)
 		if err != nil{
-			log.Fatal(err)
+			log.Println(err)
 		}
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write(json)
@@ -40,7 +40,7 @@ func Login(w http.ResponseWriter, r *http.Request){
 		userLogin.UserPassword = Hashing(userLogin.UserPassword)
 		login, err := userLogin.LoginUser(db)
 		if err != nil{
-			log.Fatal(err)
+			log.Println(err)
 		}
 		jwt := helpers.GenerateJWT(login)
 		response := map[string]interface{}{
@@ -50,7 +50,7 @@ func Login(w http.ResponseWriter, r *http.Request){
 		}
 		json, err := json.Marshal(response)
 		if err != nil{
-			log.Fatal(err)
+			log.Println(err)
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Write(json)
@@ -60,19 +60,19 @@ func Login(w http.ResponseWriter, r *http.Request){
 func Register(w http.ResponseWriter, r *http.Request){
 	db, err := helpers.Connection()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	var userRegister models.UserRegister
 	err_json := json.NewDecoder(r.Body).Decode(&userRegister)
 	if err_json != nil{
-		log.Fatal(err)
+		log.Println(err)
 	}
 	msg, isvalid := helpers.Validate(userRegister)
 	if isvalid == false{
 		response := helpers.InvalidResponse(400, msg)
 		json, err := json.Marshal(response)
 		if err != nil{
-			log.Fatal(err)
+			log.Println(err)
 		}
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write(json)
@@ -87,12 +87,12 @@ func Register(w http.ResponseWriter, r *http.Request){
 		user.UserRole = userRegister.UserRole
 		err := user.RegisterUser(db)
 		if err != nil{
-			log.Fatal(err)
+			log.Println(err)
 		}
 		response := helpers.SuccessResponse(200,"Register successfully",nil,nil)
 		json, err := json.Marshal(response)
 		if err != nil{
-			log.Fatal(err)
+			log.Println(err)
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Write(json)

@@ -1,14 +1,13 @@
 package middlewares
 
 import (
-	"belajar_golang/helpers"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
-
+	"tokokocak/helpers"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -20,7 +19,7 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 				response := helpers.FailedResponse(401, "Token must be Bearer type")
 				json, err := json.Marshal(response)
 				if err != nil {
-					log.Fatal(err)
+					log.Println(err)
 				}
 				w.WriteHeader(http.StatusUnauthorized)
 				w.Write(json)
@@ -57,7 +56,7 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 			response := helpers.FailedResponse(401, "Authorization header is required")
 			json, err := json.Marshal(response)
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
 			}
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write(json)

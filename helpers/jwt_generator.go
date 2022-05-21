@@ -1,8 +1,8 @@
 package helpers
 
 import (
-	"belajar_golang/models"
 	"time"
+	"tokokocak/models"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"

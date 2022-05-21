@@ -1,4 +1,4 @@
-module belajar_golang
+module tokokocak
 
 go 1.18
 

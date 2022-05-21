@@ -1,7 +1,6 @@
 package models
 
 import (
-	"belajar_golang/middlewares"
 	"math"
 	"net/http"
 )
@@ -17,8 +16,14 @@ type Pagination struct {
 	First      bool  `json:"first"`      // is first page
 }
 
+type MetaParam struct {
+	Limit  int64
+	Page   int64
+	Offset int64
+}
+
 func (pagination *Pagination) CreatePagination(r *http.Request) Pagination {
-	meta_param := r.Context().Value("metaParam").(middlewares.MetaParam)
+	meta_param := r.Context().Value("metaParam").(MetaParam)
 
 	int_limit := meta_param.Limit
 	int_page := meta_param.Page

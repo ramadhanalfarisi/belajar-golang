@@ -21,7 +21,7 @@ type UserLogin struct {
 }
 
 type User struct {
-	UserId        uuid.UUID `json:"ID,omitempty"`
+	UserId        uuid.UUID `json:"ID,omitempty" validate:"uuid"`
 	UserFirstname string    `json:"userFirstname,omitempty" validate:"required,alpha"`
 	UserLastname  string    `json:"userLastname,omitempty" validate:"alpha"`
 	UserEmail     string    `json:"userEmail,omitempty" validate:"required,email"`

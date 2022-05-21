@@ -29,15 +29,15 @@ func ApiMiddleware(handler http.Handler) http.Handler {
 			coffset, err3 := strconv.Atoi(offset[0])
 
 			if err1 != nil {
-				log.Fatal(err1)
+				log.Println(err1)
 			}
 
 			if err2 != nil {
-				log.Fatal(err2)
+				log.Println(err2)
 			}
 
 			if err3 != nil {
-				log.Fatal(err3)
+				log.Println(err3)
 			}
 
 			if !ok || len(limit[0]) < 1 {

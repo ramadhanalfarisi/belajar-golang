@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"belajar_golang/controllers"
+	"tokokocak/controllers"
 
 	"github.com/gorilla/mux"
 )

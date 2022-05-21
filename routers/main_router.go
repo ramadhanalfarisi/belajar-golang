@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"belajar_golang/middlewares"
+	"tokokocak/middlewares"
 	"net/http"
 
 	"github.com/gorilla/handlers"
