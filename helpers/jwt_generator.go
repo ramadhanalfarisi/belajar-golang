@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"belajar-golang/models"
+	"belajar_golang/models"
 	"time"
 
 	"github.com/golang-jwt/jwt"

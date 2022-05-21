@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"belajar-golang/helpers"
-	"belajar-golang/models"
+	"belajar_golang/helpers"
+	"belajar_golang/models"
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
@@ -89,7 +89,7 @@ func Register(w http.ResponseWriter, r *http.Request){
 		if err != nil{
 			log.Fatal(err)
 		}
-		response := helpers.SuccessResponse(200,"Register successfully",nil)
+		response := helpers.SuccessResponse(200,"Register successfully",nil,nil)
 		json, err := json.Marshal(response)
 		if err != nil{
 			log.Fatal(err)

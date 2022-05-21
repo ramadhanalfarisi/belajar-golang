@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"belajar-golang/controllers"
+	"belajar_golang/controllers"
 
 	"github.com/gorilla/mux"
 )

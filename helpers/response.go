@@ -1,13 +1,14 @@
 package helpers
 
-func SuccessResponse(code int, message string, data interface{}) map[string]interface{} {
+func SuccessResponse(code int, message string, data interface{}, meta interface{}) map[string]interface{} {
 	var response map[string]interface{}
 	response = map[string]interface{}{}
 	if data != nil {
 		response["code"] = code
 		response["status"] = "success"
-		response["data"] = data
 		response["message"] = message
+		response["data"] = data
+		response["meta"] = meta
 	} else {
 		response["code"] = code
 		response["status"] = "success"

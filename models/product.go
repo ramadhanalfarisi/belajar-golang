@@ -13,7 +13,7 @@ type Product struct {
 	ProductName  string    `json:"productName,omitempty" validate:"required"`
 	ProductDesc  string    `json:"productDesc,omitempty"`
 	ProductPrice uint32    `json:"productPrice,omitempty" validate:"required, gte=0, number"`
-	ProductImage  string    `json:"productImage,omitempty"`
+	ProductImage string    `json:"productImage,omitempty"`
 }
 
 type GetProduct struct {
@@ -21,18 +21,28 @@ type GetProduct struct {
 	ProductName  string    `json:"productName.omitempty"`
 	ProductDesc  string    `json:"productDesc,omitempty"`
 	ProductPrice uint32    `json:"productPrice,omitempty"`
-	ProductImage  string    `json:"productImage,omitempty"`
+	ProductImage string    `json:"productImage,omitempty"`
 	CreatedAt    time.Time `json:"createdAt,omitempty"`
 	UpdateAt     time.Time `json:"updateAt,omitempty"`
 }
 
-func (product *Product) SelectAllProducts(db *gorm.DB, fields []string) ([]GetProduct, error) {
+func (product *Product) SelectAllProducts(db *gorm.DB, fields []string, limit int64, offset int64) ([]GetProduct, error) {
 	var result []GetProduct
-	get_product := db.Table("products").Select(fields).Where("user_id = ?", product.UserId).Find(&result)
+	get_product := db.Table("products").Select(fields).Where("user_id = ?", product.UserId).Order("product_name asc").Limit(int(limit)).Offset(int(offset)).Find(&result)
 	if get_product.Error != nil {
 		return nil, get_product.Error
 	}
 	return result, nil
+}
+
+func (product *Product) SelectRowProducts(db *gorm.DB, fields []string) int64 {
+	var result []GetProduct
+	get_product := db.Table("products").Select(fields).Where("user_id = ?", product.UserId).Find(&result)
+	if get_product.Error != nil {
+		return 0
+	}
+	num_rows := get_product.RowsAffected
+	return num_rows
 }
 
 func (product *Product) SelectOneProduct(db *gorm.DB, fields []string) (GetProduct, error) {
@@ -44,9 +54,9 @@ func (product *Product) SelectOneProduct(db *gorm.DB, fields []string) (GetProdu
 	return result, nil
 }
 
-func InsertProduct(products []Product, db *gorm.DB) error{
-	create := db.CreateInBatches(products,5)
-	if create.Error != nil{
+func InsertProduct(products []Product, db *gorm.DB) error {
+	create := db.CreateInBatches(products, 5)
+	if create.Error != nil {
 		return create.Error
 	}
 	return nil
@@ -66,5 +76,3 @@ func (product *Product) DeleteProduct(db *gorm.DB) error {
 	}
 	return nil
 }
-
-

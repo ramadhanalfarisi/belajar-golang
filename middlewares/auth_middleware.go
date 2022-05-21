@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"belajar-golang/helpers"
+	"belajar_golang/helpers"
 	"context"
 	"encoding/json"
 	"fmt"
