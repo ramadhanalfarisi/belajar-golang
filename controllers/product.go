@@ -154,7 +154,7 @@ func InsertProducts(w http.ResponseWriter, r *http.Request) {
 		products[i].ProductId = uuid.New()
 		products[i].UserId = userId
 		validate, isvalid := helpers.Validate(product)
-		if isvalidall == true {
+		if !isvalidall {
 			isvalidall = isvalid
 		}
 		validateall = append(validateall, validate...)
@@ -186,7 +186,7 @@ func InsertProducts(w http.ResponseWriter, r *http.Request) {
 		}
 		var messages = make(chan string)
 		go insert_func(messages)
-		
+
 		print_msg(messages)
 		response := helpers.SuccessResponse(200, "Insert product succesfully", nil,nil)
 		json, err := json.Marshal(response)

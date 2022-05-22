@@ -30,7 +30,7 @@ func Login(w http.ResponseWriter, r *http.Request){
 		return
 	}
 	msg, isvalid := helpers.Validate(userLogin)
-	if isvalid == false{
+	if !isvalid{
 		response := helpers.InvalidResponse(400, msg)
 		json, err := json.Marshal(response)
 		if err != nil{
@@ -75,7 +75,7 @@ func Register(w http.ResponseWriter, r *http.Request){
 		return
 	}
 	msg, isvalid := helpers.Validate(userRegister)
-	if isvalid == false{
+	if !isvalid{
 		response := helpers.InvalidResponse(400, msg)
 		json, err := json.Marshal(response)
 		if err != nil{
