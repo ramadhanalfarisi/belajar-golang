@@ -21,11 +21,13 @@ func Login(w http.ResponseWriter, r *http.Request){
 	db, err := helpers.Connection()
 	if err != nil {
 		log.Println(err)
+		return
 	}
 	var userLogin models.UserLogin
 	err_json := json.NewDecoder(r.Body).Decode(&userLogin)
 	if err_json != nil{
 		log.Println(err)
+		return
 	}
 	msg, isvalid := helpers.Validate(userLogin)
 	if isvalid == false{
@@ -33,6 +35,7 @@ func Login(w http.ResponseWriter, r *http.Request){
 		json, err := json.Marshal(response)
 		if err != nil{
 			log.Println(err)
+			return
 		}
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write(json)
@@ -41,6 +44,7 @@ func Login(w http.ResponseWriter, r *http.Request){
 		login, err := userLogin.LoginUser(db)
 		if err != nil{
 			log.Println(err)
+			return
 		}
 		jwt := helpers.GenerateJWT(login)
 		response := map[string]interface{}{
@@ -51,6 +55,7 @@ func Login(w http.ResponseWriter, r *http.Request){
 		json, err := json.Marshal(response)
 		if err != nil{
 			log.Println(err)
+			return
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Write(json)
@@ -61,11 +66,13 @@ func Register(w http.ResponseWriter, r *http.Request){
 	db, err := helpers.Connection()
 	if err != nil {
 		log.Println(err)
+		return
 	}
 	var userRegister models.UserRegister
 	err_json := json.NewDecoder(r.Body).Decode(&userRegister)
 	if err_json != nil{
 		log.Println(err)
+		return
 	}
 	msg, isvalid := helpers.Validate(userRegister)
 	if isvalid == false{
@@ -73,6 +80,7 @@ func Register(w http.ResponseWriter, r *http.Request){
 		json, err := json.Marshal(response)
 		if err != nil{
 			log.Println(err)
+			return
 		}
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write(json)
@@ -88,11 +96,13 @@ func Register(w http.ResponseWriter, r *http.Request){
 		err := user.RegisterUser(db)
 		if err != nil{
 			log.Println(err)
+			return
 		}
 		response := helpers.SuccessResponse(200,"Register successfully",nil,nil)
 		json, err := json.Marshal(response)
 		if err != nil{
 			log.Println(err)
+			return
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Write(json)

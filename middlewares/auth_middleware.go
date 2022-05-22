@@ -20,6 +20,7 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 				json, err := json.Marshal(response)
 				if err != nil {
 					log.Println(err)
+					return
 				}
 				w.WriteHeader(http.StatusUnauthorized)
 				w.Write(json)
@@ -57,6 +58,7 @@ func AuthMiddleware(handler http.Handler) http.Handler {
 			json, err := json.Marshal(response)
 			if err != nil {
 				log.Println(err)
+				return
 			}
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write(json)

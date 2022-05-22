@@ -2,11 +2,12 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"runtime"
+	"strconv"
 	"tokokocak/helpers"
-	"tokokocak/middlewares"
 	"tokokocak/models"
 
 	"github.com/google/uuid"
@@ -23,27 +24,31 @@ func SelectAllProducts(w http.ResponseWriter, r *http.Request) {
 	db, err := helpers.Connection()
 	if err != nil {
 		log.Println(err)
+		return
 	}
 
 	userId := helpers.GetUserId(r)
-	searchRedis := helpers.SearchRedisValue("belajar:product:" + userId.String())
+	meta_param := r.Context().Value("metaParam").(models.MetaParam)
+
+	int_limit := meta_param.Limit
+	int_offset := meta_param.Offset
+	string_limit := strconv.Itoa(int(int_limit))
+	string_offset := strconv.Itoa(int(int_offset))
+	searchRedis := helpers.SearchRedisValue("belajar:product:" + userId.String() + ":" + string_limit + ":" + string_offset)
 	if searchRedis != nil {
-		product := helpers.GetRedisValue("belajar:product:" + userId.String())
+		product := helpers.GetRedisValue("belajar:product:" + userId.String() + ":" + string_limit + ":" + string_offset)
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(product))
 	} else {
 		var products models.Product
 		var get_product_response GetProductResponse
 		products.UserId = userId
-		meta_param := r.Context().Value("metaParam").(middlewares.MetaParam)
-
-		int_limit := meta_param.Limit
-		int_offset := meta_param.Offset
 
 		var func_get_product = func(ch chan []models.GetProduct) {
 			get_product, err := products.SelectAllProducts(db, []string{"product_id", "product_name", "product_desc", "product_price", "product_image", "created_at", "updated_at"}, int_limit, int_offset)
 			if err != nil {
 				log.Println(err)
+				return
 			}
 			ch <- get_product
 		}
@@ -71,12 +76,13 @@ func SelectAllProducts(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		response := helpers.SuccessResponse(200, "Get products successfully", get_product_response.Item, get_product_response.Meta)
+		response := helpers.SuccessResponse(http.StatusOK, "Get products successfully", get_product_response.Item, get_product_response.Meta)
 		json, err := json.Marshal(response)
 		if err != nil {
 			log.Println(err)
+			return
 		}
-		helpers.SetRedisValue("belajar:product:" + userId.String(), string(json))
+		helpers.SetRedisValue("belajar:product:"+userId.String()+":"+string_limit+":"+string_offset, string(json))
 		w.WriteHeader(http.StatusOK)
 		w.Write(json)
 	}
@@ -87,6 +93,7 @@ func SelectOneProduct(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Println(err)
+		return
 	}
 
 	params := mux.Vars(r)
@@ -94,6 +101,7 @@ func SelectOneProduct(w http.ResponseWriter, r *http.Request) {
 	uuid, err := uuid.Parse(id)
 	if err != nil {
 		log.Println(err)
+		return
 	}
 
 	var product models.Product
@@ -108,16 +116,97 @@ func SelectOneProduct(w http.ResponseWriter, r *http.Request) {
 	} else {
 		product.UserId = userId
 		get_product, err := product.SelectOneProduct(db, []string{"product_id", "product_name", "product_desc", "product_price", "product_image", "created_at", "updated_at"})
-		if err != nil{
+		if err != nil {
 			log.Println(err)
+			return
 		}
-		response := helpers.SuccessResponse(200,"Get product successfully",get_product,nil)
+		response := helpers.SuccessResponse(http.StatusOK, "Get product successfully", get_product, nil)
 		json, err := json.Marshal(response)
-		if err != nil{
+		if err != nil {
 			log.Println(err)
+			return
 		}
-		helpers.SetRedisValue("belajar:product:" + userId.String() + ":" + id, string(json))
+		helpers.SetRedisValue("belajar:product:"+userId.String()+":"+id, string(json))
 		w.WriteHeader(http.StatusOK)
+		w.Write(json)
+	}
+}
+
+func InsertProducts(w http.ResponseWriter, r *http.Request) {
+	db, err := helpers.Connection()
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	var products []models.Product
+
+	err2 := json.NewDecoder(r.Body).Decode(&products)
+	if err2 != nil {
+		log.Println(err2)
+		return
+	}
+
+	userId := helpers.GetUserId(r)
+	var isvalidall bool = true
+	var validateall []string
+	for i, product := range products {
+		products[i].ProductId = uuid.New()
+		products[i].UserId = userId
+		validate, isvalid := helpers.Validate(product)
+		if isvalidall == true {
+			isvalidall = isvalid
+		}
+		validateall = append(validateall, validate...)
+	}
+
+	if isvalidall {
+		insert_func := func(ch chan<- string) {
+			size := 5
+			var j int
+			for i := 0; i < len(products); i += size {
+				j += size
+				if j > len(products) {
+					j = len(products)
+				}
+				res_products := products[i:j]
+				insert_err := models.InsertProduct(res_products, db)
+				if insert_err != nil {
+					log.Println(insert_err)
+					return
+				}
+				ch <- fmt.Sprintf("Products have inserted %d:%d", i, j)
+			}
+			close(ch)
+		}
+		print_msg := func (ch <-chan string)  {
+			for message := range ch {
+				fmt.Println(message)
+			}
+		}
+		var messages = make(chan string)
+		go insert_func(messages)
+		
+		print_msg(messages)
+		response := helpers.SuccessResponse(200, "Insert product succesfully", nil,nil)
+		json, err := json.Marshal(response)
+		if err != nil {
+			log.Fatal(err)
+		}
+		getredis := helpers.SearchRedisValue("belajar:product:"+userId.String())
+		if len(getredis) > 0 {
+			helpers.DeleteRedisValue(getredis)
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write(json)
+	} else {
+		response := helpers.InvalidResponse(http.StatusBadRequest, validateall)
+		json, err := json.Marshal(response)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write(json)
 	}
 }

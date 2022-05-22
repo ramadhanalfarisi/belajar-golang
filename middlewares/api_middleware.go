@@ -2,9 +2,11 @@ package middlewares
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
-	"strconv"
+	"tokokocak/helpers"
+	"tokokocak/models"
 )
 
 type MetaParam struct {
@@ -16,51 +18,17 @@ type MetaParam struct {
 func ApiMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
-			var int_limit int64
-			var int_page int64
-			var int_offset int64
-
-			page, ok := r.URL.Query()["page"]
-			limit, ok := r.URL.Query()["limit"]
-			offset, ok := r.URL.Query()["offset"]
-
-			climit, err1 := strconv.Atoi(limit[0])
-			cpage, err2 := strconv.Atoi(page[0])
-			coffset, err3 := strconv.Atoi(offset[0])
-
-			if err1 != nil {
-				log.Println(err1)
+			meta_param, err := models.GetMetaParam(r)
+			if err != nil{
+				response := helpers.FailedResponse(http.StatusBadRequest,err.Error())
+				json,err := json.Marshal(response)
+				if err != nil{
+					log.Println(err)
+					return
+				}
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write(json)
 			}
-
-			if err2 != nil {
-				log.Println(err2)
-			}
-
-			if err3 != nil {
-				log.Println(err3)
-			}
-
-			if !ok || len(limit[0]) < 1 {
-				int_limit = 10
-			} else {
-				int_limit = int64(climit)
-			}
-
-			if !ok || len(page[0]) < 1 {
-				int_page = 1
-			} else {
-				int_page = int64(cpage)
-			}
-
-			if !ok || len(offset[0]) < 1 {
-				int_offset = 0
-			} else {
-				int_offset = int64(coffset)
-			}
-			var meta_param MetaParam
-			meta_param.Page = int_page
-			meta_param.Limit = int_limit
-			meta_param.Offset = int_offset
 			ctx := context.WithValue(context.Background(), "metaParam", meta_param)
 			r = r.WithContext(ctx)
 		}
