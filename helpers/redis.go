@@ -3,15 +3,23 @@ package helpers
 import (
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/go-redis/redis"
 )
 
+var (
+	redis_host = os.Getenv("REDIS_HOST")
+	redis_port = os.Getenv("REDIS_PORT")
+	redis_pass = os.Getenv("REDIS_PASSWORD")
+	redis_addr = fmt.Sprintf("%s:%d",redis_host,redis_port)
+)
+
 func RedisConnection() *redis.Client{
 	client := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
-		Password: "",
+		Addr: redis_addr,
+		Password: redis_pass,
 		DB: 0,
 	})
 	pong, err := client.Ping().Result()

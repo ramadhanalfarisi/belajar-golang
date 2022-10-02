@@ -1,7 +1,6 @@
 package models
 
 import (
-	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -22,8 +21,8 @@ type GetProduct struct {
 	ProductDesc  string    `json:"productDesc,omitempty"`
 	ProductPrice uint32    `json:"productPrice,omitempty"`
 	ProductImage string    `json:"productImage,omitempty"`
-	CreatedAt    time.Time `json:"createdAt,omitempty"`
-	UpdateAt     time.Time `json:"updateAt,omitempty"`
+	CreatedAt    string    `json:"createdAt,omitempty"`
+	UpdateAt     string    `json:"updateAt,omitempty"`
 }
 
 func (product *Product) SelectAllProducts(db *gorm.DB, fields []string, limit int64, offset int64) ([]GetProduct, error) {
@@ -54,14 +53,14 @@ func (product *Product) SelectOneProduct(db *gorm.DB, fields []string) (GetProdu
 	return result, nil
 }
 
-func InsertProduct(products []Product, db *gorm.DB) error {
-	create := db.CreateInBatches(products, 5)
+func (product *Product) InsertProduct(db *gorm.DB) error {
+	create := db.Create(&product)
 	if create.Error != nil {
 		return create.Error
 	}
 	return nil
 }
-func (product *Product) UpdateProduct(data map[string]interface{}, db *gorm.DB) (GetProduct, error) {
+func (product *Product) UpdateProduct(data Product, db *gorm.DB) (GetProduct, error) {
 	updates := db.Model(&Product{}).Where("product_id = ? AND user_id = ?", product.ProductId, product.UserId).Updates(data)
 	if updates.Error != nil {
 		return GetProduct{}, updates.Error

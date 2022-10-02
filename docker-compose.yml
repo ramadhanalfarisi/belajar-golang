@@ -1,0 +1,60 @@
+version: '3'
+services:
+  app:
+    container_name: toko_kocak
+    build: .
+    ports:
+      - 8080:8080
+    restart: always
+    volumes:
+      - ./:/usr/src/app/
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - apinetwork
+        
+  postgres:
+    image: postgres:latest
+    container_name: db_tokokocak
+    ports:
+      - 4321:5432
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - database:/var/lib/postgresql/data
+    networks:
+      - apinetwork
+
+  migrate:
+    image: migrate/migrate
+    networks:
+        - apinetwork
+    volumes:
+        - .:/migrations
+    command: ["-path", "/migrations", "-database",  "postgres://postgres:konohagakure@toko_kocak:5432/toko_kocak?sslmode=disable", "up", "3"]
+    links: 
+        - postgres
+    depends_on:
+        - postgres
+  
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass konohagakure
+    volumes: 
+      - cache:/data
+volumes:
+  database:
+  cache:
+
+networks:
+  apinetwork:
+    driver: bridge
+
+    

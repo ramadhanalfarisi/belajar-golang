@@ -26,5 +26,6 @@ func main(){
 	loadEnv()
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	log.Println("Your application running on http://localhost:3000")
-	routers.Router()
+	routes := routers.Routes{}
+	routes.Router()
 }

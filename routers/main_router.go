@@ -8,7 +8,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func Router() {
+type Routes struct {
+	Mux *mux.Router
+}
+
+func (routes *Routes) Router() {
 	mux := mux.NewRouter().StrictSlash(true)
 	headers := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
 	methods := handlers.AllowedMethods([]string{"GET","POST","PUT","DELETE"})
@@ -18,5 +22,6 @@ func Router() {
 	secure.Use(middlewares.AuthMiddleware, middlewares.ApiMiddleware)
 	Authentication(ed_version)
 	Products(secure)
+	routes.Mux = mux
 	http.ListenAndServe(":3000",handlers.CORS(headers,methods,origins)(mux))
 }
