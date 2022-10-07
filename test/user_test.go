@@ -6,24 +6,27 @@ import (
 	"encoding/hex"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strconv"
 	"testing"
 	"time"
-	"tokokocak/helpers"
-	"tokokocak/routers"
+	"tokokocak/app"
 
 	"github.com/google/uuid"
 )
 
-var r routers.Routes
+var a app.App
 
-var (
-	connect, _ = helpers.Connection()
-	route      = r.Mux
-)
+func TestMain(m *testing.M) {
+	a.Connection("test")
+
+	code := m.Run()
+	clearTable()
+	os.Exit(code)
+}
 
 func clearTable() {
-	connect.Exec("DELETE FROM users")
+	a.DB.Exec("DELETE FROM users;")
 }
 
 func checkResponseCode(t *testing.T, expected, actual int) {
@@ -34,7 +37,7 @@ func checkResponseCode(t *testing.T, expected, actual int) {
 
 func executeRequest(req *http.Request) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
-	route.ServeHTTP(rr, req)
+	a.Mux.ServeHTTP(rr, req)
 
 	return rr
 }
@@ -55,7 +58,7 @@ func registerUser(i int) {
 		user_role := "user"
 		created_at := time.Now().Format("2006-01-02 15:04:05")
 	
-		connect.Exec("INSERT INTO users VALUES(?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL)",user_id,user_firstname,user_lastname,user_email,user_address,user_password,user_role,created_at)
+		a.DB.Exec("INSERT INTO users VALUES(?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL);",user_id,user_firstname,user_lastname,user_email,user_address,user_password,user_role,created_at)
 	}
 }
 
@@ -71,7 +74,7 @@ func TestRegisterUser(t *testing.T) {
 			"userRepassword" : "konohagakure",
 			"userRole" : "user"
 		}`)
-	req, _ := http.NewRequest("POST", "/register", bytes.NewBuffer(jsonStr))
+	req, _ := http.NewRequest("POST", "/v1/register", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 
 	response := executeRequest(req)
@@ -84,9 +87,9 @@ func TestLoginUser(t *testing.T) {
 	registerUser(1)
 	var jsonStr = []byte(`{
 			"userEmail" : "user1@gmail.com",
-			"userPassword" : "password1",
+			"userPassword" : "password1"
 		}`)
-	req, _ := http.NewRequest("POST", "/login", bytes.NewBuffer(jsonStr))
+	req, _ := http.NewRequest("POST", "/v1/login", bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 
 	response := executeRequest(req)

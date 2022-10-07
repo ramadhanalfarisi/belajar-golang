@@ -19,13 +19,9 @@ type GetProductResponse struct {
 	Meta models.Pagination
 }
 
-var (
-	db, _ = helpers.Connection()
-)
-
-func SelectAllProducts(w http.ResponseWriter, r *http.Request) {
+func (controller *Controller) SelectAllProducts(w http.ResponseWriter, r *http.Request) {
 	runtime.GOMAXPROCS(2)
-
+	db := controller.DB
 	userId := helpers.GetUserId(r)
 	meta_param := r.Context().Value("metaParam").(models.MetaParam)
 
@@ -87,7 +83,8 @@ func SelectAllProducts(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func SelectOneProduct(w http.ResponseWriter, r *http.Request) {
+func (controller *Controller) SelectOneProduct(w http.ResponseWriter, r *http.Request) {
+	db := controller.DB
 	params := mux.Vars(r)
 	id := params["id"]
 	uuid, err := uuid.Parse(id)
@@ -124,7 +121,7 @@ func SelectOneProduct(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func InsertProducts(w http.ResponseWriter, r *http.Request) {
+func (controller *Controller) InsertProducts(w http.ResponseWriter, r *http.Request) {
 	var products []models.Product
 
 	err2 := json.NewDecoder(r.Body).Decode(&products)
@@ -144,9 +141,9 @@ func InsertProducts(w http.ResponseWriter, r *http.Request) {
 
 	if validateall == nil {
 		chanProduct := convertChanProduct(products)
-		chanInsert1 := insertProduct(chanProduct)
-		chanInsert2 := insertProduct(chanProduct)
-		mergeChanOut := mergeChanOut(chanInsert1,chanInsert2)
+		chanInsert1 := controller.insertProduct(chanProduct)
+		chanInsert2 := controller.insertProduct(chanProduct)
+		mergeChanOut := mergeChanOut(chanInsert1, chanInsert2)
 		for message := range mergeChanOut {
 			fmt.Println(message)
 		}
@@ -176,22 +173,22 @@ func InsertProducts(w http.ResponseWriter, r *http.Request) {
 func convertChanProduct(products []models.Product) <-chan models.Product {
 	chanOut := make(chan models.Product)
 
-	go func ()  {
+	go func() {
 		for _, product := range products {
 			chanOut <- product
 		}
-		close(chanOut)	
+		close(chanOut)
 	}()
 
 	return chanOut
 }
 
-func insertProduct(chanProd <-chan models.Product) <-chan string {
+func (controller *Controller) insertProduct(chanProd <-chan models.Product) <-chan string {
 	chanOut := make(chan string)
 
 	go func() {
 		for prod := range chanProd {
-			prod.InsertProduct(db)
+			prod.InsertProduct(controller.DB)
 			chanOut <- fmt.Sprint("Insert data successfully")
 		}
 		close(chanOut)
@@ -199,30 +196,30 @@ func insertProduct(chanProd <-chan models.Product) <-chan string {
 	return chanOut
 }
 
-func mergeChanOut(chanInserts ...<-chan string) <-chan string{
+func mergeChanOut(chanInserts ...<-chan string) <-chan string {
 	wg := new(sync.WaitGroup)
 	chanOut := make(chan string)
 
 	wg.Add(len(chanInserts))
-	for _,chanInsert := range chanInserts {
-		go func (chanIns <-chan string)  {
+	for _, chanInsert := range chanInserts {
+		go func(chanIns <-chan string) {
 			for chanIn := range chanIns {
 				chanOut <- chanIn
 			}
-		wg.Done()
+			wg.Done()
 		}(chanInsert)
 	}
 
-	go func ()  {
+	go func() {
 		wg.Wait()
-		close(chanOut)	
+		close(chanOut)
 	}()
 
 	return chanOut
 }
 
-func UpdateProduct(w http.ResponseWriter, r *http.Request) {
-
+func (controller *Controller) UpdateProduct(w http.ResponseWriter, r *http.Request) {
+	db := controller.DB
 	userId := helpers.GetUserId(r)
 	params := mux.Vars(r)
 	id := params["id"]
@@ -265,11 +262,8 @@ func UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func DeleteProduct(w http.ResponseWriter, r *http.Request) {
-	connect, err := helpers.Connection()
-	if err != nil {
-		helpers.Error(err)
-	}
+func (controller *Controller) DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	connect := controller.DB
 	userId := helpers.GetUserId(r)
 	params := mux.Vars(r)
 	id := params["id"]
@@ -277,7 +271,7 @@ func DeleteProduct(w http.ResponseWriter, r *http.Request) {
 
 	var product models.Product
 	err2 := json.NewDecoder(r.Body).Decode(&product)
-	if err != nil {
+	if err2 != nil {
 		helpers.Error(err2)
 	}
 	product.ProductId = uuid

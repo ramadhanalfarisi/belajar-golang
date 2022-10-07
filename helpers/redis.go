@@ -9,18 +9,23 @@ import (
 	"github.com/go-redis/redis"
 )
 
-var (
+var redis_host,
+	redis_port,
+	redis_pass,
+	redis_addr string
+
+func init() {
 	redis_host = os.Getenv("REDIS_HOST")
 	redis_port = os.Getenv("REDIS_PORT")
 	redis_pass = os.Getenv("REDIS_PASSWORD")
-	redis_addr = fmt.Sprintf("%s:%d",redis_host,redis_port)
-)
+	redis_addr = fmt.Sprintf("%s:%d", redis_host, redis_port)
+}
 
-func RedisConnection() *redis.Client{
+func RedisConnection() *redis.Client {
 	client := redis.NewClient(&redis.Options{
-		Addr: redis_addr,
+		Addr:     redis_addr,
 		Password: redis_pass,
-		DB: 0,
+		DB:       0,
 	})
 	pong, err := client.Ping().Result()
 	if err != nil {
@@ -32,7 +37,7 @@ func RedisConnection() *redis.Client{
 
 func SetRedisValue(key string, value string) bool {
 	client := RedisConnection()
-	err := client.Set(key, value, 1  * time.Minute).Err()
+	err := client.Set(key, value, 1*time.Minute).Err()
 	if err != nil {
 		log.Println(err)
 	}
@@ -60,10 +65,10 @@ func DeleteRedisValue(keys []string) bool {
 	return true
 }
 
-func SearchRedisValue(keys string) []string{
+func SearchRedisValue(keys string) []string {
 	client := RedisConnection()
-	search,err := client.Keys(keys).Result();
-	if err != nil{
+	search, err := client.Keys(keys).Result()
+	if err != nil {
 		log.Println(err)
 	}
 	client.Close()

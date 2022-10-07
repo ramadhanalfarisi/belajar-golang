@@ -1,41 +1,43 @@
 version: '3'
 services:
-  app:
-    container_name: toko_kocak
+  app_test:
+    container_name: toko_kocak_test
     build: 
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile.test
     env_file:
       - .env
     ports:
-      - 8080:8080
+      - 8081:8080
     restart: always
     volumes:
       - ./:/usr/src/app/
     depends_on:
-      - postgres
-      - redis
+      - postgres_test
+      - redis_test
     networks:
       - apinetwork
         
-  postgres:
+  postgres_test:
     image: postgres:latest
-    container_name: db_tokokocak
+    container_name: db_tokokocak_test
     ports:
-      - 5432:5432
+      - 4321:5432
     restart: always
     environment:
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD_TEST}
+      - POSTGRES_USER=${DB_USER_TEST}
+      - POSTGRES_DB=${DB_NAME_TEST}
     volumes:
       - database:/var/lib/postgresql/data
       - ./db:/docker-entrypoint-initdb.d/
     networks:
       - apinetwork
-  redis:
+        
+  redis_test:
     image: redis:6.2-alpine
     restart: always
+    container_name: tk_redis_test
     ports:
       - '6379:6379'
     command: redis-server --save 20 1 --loglevel warning --requirepass konohagakure

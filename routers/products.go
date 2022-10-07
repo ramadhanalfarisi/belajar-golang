@@ -6,7 +6,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func Products(mux *mux.Router) {
-	mux.HandleFunc("/products", controllers.SelectAllProducts).Methods("GET")
-	mux.HandleFunc("/products/{id}", controllers.SelectAllProducts).Methods("GET")
+func(routers *Routers) Products(mux *mux.Router) {
+	controller := controllers.Controller{}
+	controller.DB = routers.DB
+	mux.HandleFunc("/products", controller.SelectAllProducts).Methods("GET")
+	mux.HandleFunc("/products/{id}", controller.SelectAllProducts).Methods("GET")
 }

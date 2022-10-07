@@ -1,13 +1,13 @@
 package controllers
 
 import (
-	"tokokocak/helpers"
-	"tokokocak/models"
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
 	"log"
 	"net/http"
+	"tokokocak/helpers"
+	"tokokocak/models"
 
 	"github.com/google/uuid"
 )
@@ -17,16 +17,14 @@ func Hashing(text string) string {
 	return hex.EncodeToString(hash[:])
 }
 
-func Login(w http.ResponseWriter, r *http.Request){
-	db, err := helpers.Connection()
-	if err != nil {
-		log.Println(err)
-		return
-	}
+
+func (controller *Controller) Login(w http.ResponseWriter, r *http.Request){
+	db := controller.DB
+	
 	var userLogin models.UserLogin
 	err_json := json.NewDecoder(r.Body).Decode(&userLogin)
 	if err_json != nil{
-		log.Println(err)
+		log.Println(err_json)
 		return
 	}
 	msg, isvalid := helpers.Validate(userLogin)
@@ -62,16 +60,13 @@ func Login(w http.ResponseWriter, r *http.Request){
 	}
 }
 
-func Register(w http.ResponseWriter, r *http.Request){
-	db, err := helpers.Connection()
-	if err != nil {
-		log.Println(err)
-		return
-	}
+func (controller *Controller) Register(w http.ResponseWriter, r *http.Request){
+	db := controller.DB
+	
 	var userRegister models.UserRegister
 	err_json := json.NewDecoder(r.Body).Decode(&userRegister)
 	if err_json != nil{
-		log.Println(err)
+		log.Println(err_json)
 		return
 	}
 	msg, isvalid := helpers.Validate(userRegister)

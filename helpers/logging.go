@@ -6,13 +6,12 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+
 	"time"
 )
 
 var (
-	filepath      = os.Getenv("LOCAL_FILEPATH")
-	date          = time.Now().Format("2006-01-02")
-	debug, _      = strconv.ParseBool(os.Getenv("DEBUG"))
+	date = time.Now().Format("2006-01-02")
 	WarningLogger *log.Logger
 	InfoLogger    *log.Logger
 	ErrorLogger   *log.Logger
@@ -21,6 +20,7 @@ var (
 
 func init() {
 	var f *os.File
+	filepath := os.Getenv("FILEPATH")
 	log_path := filepath + "/logs/" + date + ".txt"
 	if _, err := os.Stat(log_path); os.IsNotExist(err) {
 		var errcreate error
@@ -35,10 +35,10 @@ func init() {
 			log.Fatal(erropen)
 		}
 	}
-	InfoLogger = log.New(f,"[INFO] ",log.Ldate|log.Ltime|log.Lshortfile)
-	WarningLogger = log.New(f,"[WARNING] ",log.Ldate|log.Ltime|log.Lshortfile)
-	ErrorLogger = log.New(f,"[ERROR] ",log.Ldate|log.Ltime|log.Lshortfile)
-	DebugLogger = log.New(f,"[DEBUG] ",log.Ldate|log.Ltime|log.Lshortfile)
+	InfoLogger = log.New(f, "[INFO] ", log.Ldate|log.Ltime|log.Lshortfile)
+	WarningLogger = log.New(f, "[WARNING] ", log.Ldate|log.Ltime|log.Lshortfile)
+	ErrorLogger = log.New(f, "[ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)
+	DebugLogger = log.New(f, "[DEBUG] ", log.Ldate|log.Ltime|log.Lshortfile)
 }
 
 func Info(msg string) {
@@ -50,12 +50,14 @@ func Warning(msg string) {
 }
 
 func Debug(msg string) {
+	debug, _      := strconv.ParseBool(os.Getenv("DEBUG"))
 	if debug {
 		DebugLogger.Println(msg)
 	}
 }
 
 func Error(err error) {
+	debug, _      := strconv.ParseBool(os.Getenv("DEBUG"))
 	var logs string
 	pc, fn, line, _ := runtime.Caller(1)
 	// Include function name if debugging
