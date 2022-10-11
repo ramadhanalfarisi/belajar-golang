@@ -7,11 +7,11 @@ import (
 )
 
 func main() {
-	
+	env := "development"
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	log.Println("Your application running on http://localhost:8080")
-	helpers.Migrate("dev")
+	log.Println("Your application running on http://localhost:8082")
+	helpers.Migrate(env)
 	app := app.App{}
-	app.Connection("development")
+	app.Connection(env)
 	app.Run(":8080")
 }

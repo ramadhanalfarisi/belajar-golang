@@ -14,8 +14,8 @@ import (
 
 var db_user, db_password, db_name, db_host, db_port string
 
-func init() {
-	if environment := os.Getenv("ENVIRONMENT"); environment == "test" {
+func Migrate(environment string) {
+	if environment == "test" {
 		db_user = os.Getenv("DB_USER_TEST")
 		db_password = os.Getenv("DB_PASSWORD_TEST")
 		db_name = os.Getenv("DB_NAME_TEST")
@@ -34,9 +34,6 @@ func init() {
 		db_host = os.Getenv("DB_HOST")
 		db_port = os.Getenv("DB_PORT")
 	}
-}
-
-func Migrate(env string) {
 	strCon := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", db_user, db_password, db_host, db_port, db_name)
 	db, err := sql.Open("postgres", strCon)
 	if err != nil {
@@ -46,10 +43,10 @@ func Migrate(env string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	path := "file:///app/migrations/"
+	path := "file://./migrations/"
 	m, err := migrate.NewWithDatabaseInstance(
 		path,
-		"toko_kocak", driver)
+		db_name, driver)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,0 +1,56 @@
+version: '3'
+services:
+  app_dev:
+    container_name: toko_kocak_dev
+    build: 
+      context: .
+      dockerfile: ./Dockerfile.dev
+    env_file:
+      - .env
+    ports:
+      - 8082:8080
+    restart: always
+    volumes:
+      - ./:/usr/src/app/
+    depends_on:
+      - postgres_dev
+      - redis_dev
+    networks:
+      - apinetworkdev
+        
+  postgres_dev:
+    image: postgres:latest
+    container_name: db_tokokocak_dev
+    ports:
+      - 6543:5432
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD_DEV}
+      - POSTGRES_USER=${DB_USER_DEV}
+      - POSTGRES_DB=${DB_NAME_DEV}
+    volumes:
+      - databasedev:/var/lib/postgresql/data
+      - ./db/db-dev:/docker-entrypoint-initdb.d/
+    networks:
+      - apinetworkdev
+        
+  redis_dev:
+    image: redis:6.2-alpine
+    restart: always
+    container_name: tk_redis_dev
+    ports:
+      - '6381:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass konohagakure
+    volumes: 
+      - cachedev:/data
+    networks:
+      - apinetworkdev
+volumes:
+  databasedev:
+  cachedev:
+
+networks:
+  apinetworkdev:
+    driver: bridge
+
+    

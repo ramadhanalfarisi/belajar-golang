@@ -22,8 +22,9 @@ type App struct {
 func (app *App) ListRouter() {
 	mux := mux.NewRouter().StrictSlash(true)
 	ed_version := mux.PathPrefix("/v1").Subrouter()
+	ed_version.Use(middlewares.ApiMiddleware)
 	secure := ed_version.NewRoute().Subrouter()
-	secure.Use(middlewares.AuthMiddleware, middlewares.ApiMiddleware)
+	secure.Use(middlewares.AuthMiddleware)
 	app.Mux = mux
 	routers := routers.Routers{}
 	routers.DB = app.DB

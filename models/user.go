@@ -6,13 +6,13 @@ import (
 )
 
 type UserRegister struct {
-	UserFirstname  string    `json:"userFirstname,omitempty" validate:"required,alpha"`
-	UserLastname   string    `json:"userLastname,omitempty" validate:"alpha"`
-	UserEmail      string    `json:"userEmail,omitempty" validate:"required,email"`
-	UserAddress    string    `json:"userAddress,omitempty"`
-	UserPassword   string    `json:"userPassword,omitempty" validate:"required"`
-	UserRepassword string    `json:"userRepassword,omitempty" validate:"required,eqfield=UserPassword"`
-	UserRole       string    `json:"userRole,omitempty" validate:"required"`
+	UserFirstname  string `json:"userFirstname,omitempty" validate:"required,alpha"`
+	UserLastname   string `json:"userLastname,omitempty"`
+	UserEmail      string `json:"userEmail,omitempty" validate:"required,email"`
+	UserAddress    string `json:"userAddress,omitempty"`
+	UserPassword   string `json:"userPassword,omitempty" validate:"required"`
+	UserRepassword string `json:"userRepassword,omitempty" validate:"required,eqfield=UserPassword"`
+	UserRole       string `json:"userRole,omitempty" validate:"required"`
 }
 
 type UserLogin struct {
@@ -21,13 +21,15 @@ type UserLogin struct {
 }
 
 type User struct {
-	UserId        uuid.UUID `json:"ID,omitempty" validate:"uuid"`
+	UserId        uuid.UUID `json:"ID,omitempty" validate:"required"`
 	UserFirstname string    `json:"userFirstname,omitempty" validate:"required,alpha"`
-	UserLastname  string    `json:"userLastname,omitempty" validate:"alpha"`
+	UserLastname  string    `json:"userLastname,omitempty"`
 	UserEmail     string    `json:"userEmail,omitempty" validate:"required,email"`
 	UserAddress   string    `json:"userAddress,omitempty"`
 	UserPassword  string    `json:"userPassword,omitempty" validate:"required"`
 	UserRole      string    `json:"userRole,omitempty" validate:"required"`
+	CreatedAt     string    `json:"createdAt,omitempty"`
+	UpdatedAt     *string    `json:"updatedAt,omitempty"`
 }
 
 func (user *User) RegisterUser(db *gorm.DB) error {

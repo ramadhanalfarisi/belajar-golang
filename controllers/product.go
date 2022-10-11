@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"strconv"
 	"sync"
+	"time"
 	"tokokocak/helpers"
 	"tokokocak/models"
 
@@ -23,14 +24,13 @@ func (controller *Controller) SelectAllProducts(w http.ResponseWriter, r *http.R
 	runtime.GOMAXPROCS(2)
 	db := controller.DB
 	userId := helpers.GetUserId(r)
-	meta_param := r.Context().Value("metaParam").(models.MetaParam)
-
+	meta_param, _ := models.GetMetaParam(r)
 	int_limit := meta_param.Limit
 	int_offset := meta_param.Offset
 	string_limit := strconv.Itoa(int(int_limit))
 	string_offset := strconv.Itoa(int(int_offset))
 	searchRedis := helpers.SearchRedisValue("tokokocak:product:" + userId.String() + ":" + string_limit + ":" + string_offset)
-	if searchRedis != nil {
+	if len(searchRedis) > 0 {
 		product := helpers.GetRedisValue("tokokocak:product:" + userId.String() + ":" + string_limit + ":" + string_offset)
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(product))
@@ -52,7 +52,7 @@ func (controller *Controller) SelectAllProducts(w http.ResponseWriter, r *http.R
 			get_product_num := products.SelectRowProducts(db, []string{"product_id"})
 			var pagination models.Pagination
 			pagination.Total = get_product_num
-			result_pagination := pagination.CreatePagination(r)
+			result_pagination := pagination.CreatePagination(r, meta_param)
 			ch <- result_pagination
 		}
 
@@ -98,7 +98,7 @@ func (controller *Controller) SelectOneProduct(w http.ResponseWriter, r *http.Re
 
 	userId := helpers.GetUserId(r)
 	searchRedis := helpers.SearchRedisValue("tokokocak:product:" + userId.String() + ":" + id)
-	if searchRedis != nil {
+	if len(searchRedis) > 0 {
 		product := helpers.GetRedisValue("tokokocak:product:" + userId.String() + ":" + id)
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(product))
@@ -132,10 +132,12 @@ func (controller *Controller) InsertProducts(w http.ResponseWriter, r *http.Requ
 
 	userId := helpers.GetUserId(r)
 	var validateall []string
-	for _, product := range products {
-		product.ProductId = uuid.New()
-		product.UserId = userId
-		validate, _ := helpers.Validate(product)
+	for i := range products {
+		products[i].ProductId = uuid.New()
+		products[i].UserId = userId
+		products[i].CreatedAt = time.Now().Format("2006-01-02 15:04:05")
+		products[i].UpdatedAt = nil
+		validate, _ := helpers.Validate(products[i])
 		validateall = append(validateall, validate...)
 	}
 
@@ -189,7 +191,7 @@ func (controller *Controller) insertProduct(chanProd <-chan models.Product) <-ch
 	go func() {
 		for prod := range chanProd {
 			prod.InsertProduct(controller.DB)
-			chanOut <- fmt.Sprint("Insert data successfully")
+			chanOut <- "Insert data successfully"
 		}
 		close(chanOut)
 	}()
@@ -236,11 +238,13 @@ func (controller *Controller) UpdateProduct(w http.ResponseWriter, r *http.Reque
 	validate, _ := helpers.Validate(product)
 
 	if validate == nil {
+		now := time.Now().Format("2006-01-02 15:04:05")
 		data := models.Product{
 			ProductName:  product.ProductName,
 			ProductDesc:  product.ProductDesc,
 			ProductPrice: product.ProductPrice,
 			ProductImage: product.ProductImage,
+			UpdatedAt:    &now,
 		}
 		res_products, err := product.UpdateProduct(data, db)
 		if err != nil {

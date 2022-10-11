@@ -7,19 +7,21 @@ import (
 )
 
 type Product struct {
-	ProductId    uuid.UUID `json:"ID,omitempty" validate:"uuid"`
+	ProductId    uuid.UUID `json:"ID,omitempty" validate:"required"`
 	UserId       uuid.UUID `json:"userId,omitempty" validate:"required"`
 	ProductName  string    `json:"productName,omitempty" validate:"required"`
 	ProductDesc  string    `json:"productDesc,omitempty"`
-	ProductPrice uint32    `json:"productPrice,omitempty" validate:"required, gte=0, number"`
+	ProductPrice float32    `json:"productPrice,omitempty" gorm:"type:decimal(15,2)" validate:"required,min=0,number"`
 	ProductImage string    `json:"productImage,omitempty"`
+	CreatedAt     string    `json:"createdAt,omitempty"`
+	UpdatedAt     *string    `json:"updatedAt,omitempty"`
 }
 
 type GetProduct struct {
 	ProductId    uuid.UUID `json:"ID,omitempty"`
 	ProductName  string    `json:"productName.omitempty"`
 	ProductDesc  string    `json:"productDesc,omitempty"`
-	ProductPrice uint32    `json:"productPrice,omitempty"`
+	ProductPrice float32    `json:"productPrice,omitempty" gorm:"type:decimal(15,2)"`
 	ProductImage string    `json:"productImage,omitempty"`
 	CreatedAt    string    `json:"createdAt,omitempty"`
 	UpdateAt     string    `json:"updateAt,omitempty"`

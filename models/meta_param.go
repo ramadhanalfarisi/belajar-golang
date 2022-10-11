@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -16,35 +15,31 @@ func GetMetaParam(r *http.Request) (MetaParam, error) {
 	var int_limit int64
 	var int_page int64
 	var int_offset int64
+	var climit, cpage int
 
-	page, ok := r.URL.Query()["page"]
-	limit, ok := r.URL.Query()["limit"]
-
-	climit, err1 := strconv.Atoi(limit[0])
-	cpage, err2 := strconv.Atoi(page[0])
-
-	if err1 != nil {
-		return MetaParam{}, fmt.Errorf("Limit have to numeric")
+	page, ok1 := r.URL.Query()["page"]
+	limit, ok2 := r.URL.Query()["limit"]
+	if ok1 {
+		cpage, _ = strconv.Atoi(page[0])
+	}
+	if ok2 {
+		climit, _ = strconv.Atoi(limit[0])
 	}
 
-	if err2 != nil {
-		return MetaParam{}, fmt.Errorf("Page have to numeric")
-	}
-
-	if !ok || len(limit[0]) < 1 {
-		int_limit = 10
-	} else {
-		int_limit = int64(climit)
-	}
-
-	if !ok || len(page[0]) < 1 {
+	if !ok1 || len(page[0]) < 1 {
 		int_page = 1
 	} else {
 		if int64(climit) < 1 {
-			return MetaParam{}, fmt.Errorf("Page have to more than 0")
+			int_page = 1
 		} else {
 			int_page = int64(cpage)
 		}
+	}
+
+	if !ok2 || len(limit[0]) < 1 {
+		int_limit = 10
+	} else {
+		int_limit = int64(climit)
 	}
 
 	if int_page == 1 {

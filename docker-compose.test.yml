@@ -10,13 +10,11 @@ services:
     ports:
       - 8081:8080
     restart: always
-    volumes:
-      - ./:/usr/src/app/
     depends_on:
       - postgres_test
       - redis_test
     networks:
-      - apinetwork
+      - apinetworktest
         
   postgres_test:
     image: postgres:latest
@@ -29,28 +27,28 @@ services:
       - POSTGRES_USER=${DB_USER_TEST}
       - POSTGRES_DB=${DB_NAME_TEST}
     volumes:
-      - database:/var/lib/postgresql/data
-      - ./db:/docker-entrypoint-initdb.d/
+      - databasetest:/var/lib/postgresql/data
+      - ./db/db-test:/docker-entrypoint-initdb.d/
     networks:
-      - apinetwork
+      - apinetworktest
         
   redis_test:
     image: redis:6.2-alpine
     restart: always
     container_name: tk_redis_test
     ports:
-      - '6379:6379'
+      - '6380:6379'
     command: redis-server --save 20 1 --loglevel warning --requirepass konohagakure
     volumes: 
-      - cache:/data
+      - cachetest:/data
     networks:
-      - apinetwork
+      - apinetworktest
 volumes:
-  database:
-  cache:
+  databasetest:
+  cachetest:
 
 networks:
-  apinetwork:
+  apinetworktest:
     driver: bridge
 
     

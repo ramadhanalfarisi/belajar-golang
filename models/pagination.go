@@ -17,8 +17,7 @@ type Pagination struct {
 }
 
 
-func (pagination *Pagination) CreatePagination(r *http.Request) Pagination {
-	meta_param := r.Context().Value("metaParam").(MetaParam)
+func (pagination *Pagination) CreatePagination(r *http.Request, meta_param MetaParam) Pagination {
 
 	int_limit := meta_param.Limit
 	int_page := meta_param.Page

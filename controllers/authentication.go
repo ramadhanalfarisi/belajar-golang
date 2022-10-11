@@ -4,8 +4,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
-	"log"
 	"net/http"
+	"time"
 	"tokokocak/helpers"
 	"tokokocak/models"
 
@@ -24,7 +24,7 @@ func (controller *Controller) Login(w http.ResponseWriter, r *http.Request){
 	var userLogin models.UserLogin
 	err_json := json.NewDecoder(r.Body).Decode(&userLogin)
 	if err_json != nil{
-		log.Println(err_json)
+		helpers.Error(err_json)
 		return
 	}
 	msg, isvalid := helpers.Validate(userLogin)
@@ -32,7 +32,7 @@ func (controller *Controller) Login(w http.ResponseWriter, r *http.Request){
 		response := helpers.InvalidResponse(400, msg)
 		json, err := json.Marshal(response)
 		if err != nil{
-			log.Println(err)
+			helpers.Error(err)
 			return
 		}
 		w.WriteHeader(http.StatusBadRequest)
@@ -41,7 +41,7 @@ func (controller *Controller) Login(w http.ResponseWriter, r *http.Request){
 		userLogin.UserPassword = Hashing(userLogin.UserPassword)
 		login, err := userLogin.LoginUser(db)
 		if err != nil{
-			log.Println(err)
+			helpers.Error(err)
 			return
 		}
 		jwt := helpers.GenerateJWT(login)
@@ -52,7 +52,7 @@ func (controller *Controller) Login(w http.ResponseWriter, r *http.Request){
 		}
 		json, err := json.Marshal(response)
 		if err != nil{
-			log.Println(err)
+			helpers.Error(err)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
@@ -66,7 +66,7 @@ func (controller *Controller) Register(w http.ResponseWriter, r *http.Request){
 	var userRegister models.UserRegister
 	err_json := json.NewDecoder(r.Body).Decode(&userRegister)
 	if err_json != nil{
-		log.Println(err_json)
+		helpers.Error(err_json)
 		return
 	}
 	msg, isvalid := helpers.Validate(userRegister)
@@ -74,7 +74,7 @@ func (controller *Controller) Register(w http.ResponseWriter, r *http.Request){
 		response := helpers.InvalidResponse(400, msg)
 		json, err := json.Marshal(response)
 		if err != nil{
-			log.Println(err)
+			helpers.Error(err)
 			return
 		}
 		w.WriteHeader(http.StatusBadRequest)
@@ -88,15 +88,17 @@ func (controller *Controller) Register(w http.ResponseWriter, r *http.Request){
 		user.UserEmail = userRegister.UserEmail
 		user.UserPassword = Hashing(userRegister.UserPassword)
 		user.UserRole = userRegister.UserRole
+		user.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
+		user.UpdatedAt = nil
 		err := user.RegisterUser(db)
 		if err != nil{
-			log.Println(err)
+			helpers.Error(err)
 			return
 		}
 		response := helpers.SuccessResponse(200,"Register successfully",nil,nil)
 		json, err := json.Marshal(response)
 		if err != nil{
-			log.Println(err)
+			helpers.Error(err)
 			return
 		}
 		w.WriteHeader(http.StatusOK)

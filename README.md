@@ -9,6 +9,6 @@ Learn Golang with GORM, Redis, JWT, etc
 4. Determination
 # Unit Testing
 
-```bash
-docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit && docker-compose -f docker-compose.test.yml down
+```ps
+docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit;docker-compose -f docker-compose.test.yml down
 ```

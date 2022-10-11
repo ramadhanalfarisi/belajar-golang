@@ -12,16 +12,28 @@ import (
 var redis_host,
 	redis_port,
 	redis_pass,
-	redis_addr string
+	redis_addr, environment string
 
 func init() {
-	redis_host = os.Getenv("REDIS_HOST")
-	redis_port = os.Getenv("REDIS_PORT")
-	redis_pass = os.Getenv("REDIS_PASSWORD")
-	redis_addr = fmt.Sprintf("%s:%d", redis_host, redis_port)
+	environment = "development"
 }
 
 func RedisConnection() *redis.Client {
+	if environment == "test" {
+		redis_host = os.Getenv("REDIS_HOST_TEST")
+		redis_port = os.Getenv("REDIS_PORT_TEST")
+		redis_pass = os.Getenv("REDIS_PASSWORD_TEST")
+	} else if environment == "development" {
+		redis_host = os.Getenv("REDIS_HOST_DEV")
+		redis_port = os.Getenv("REDIS_PORT_DEV")
+		redis_pass = os.Getenv("REDIS_PASSWORD_DEV")
+	} else {
+		redis_host = os.Getenv("REDIS_HOST")
+		redis_port = os.Getenv("REDIS_PORT")
+		redis_pass = os.Getenv("REDIS_PASSWORD")
+	}
+
+	redis_addr = fmt.Sprintf("%s:%s", redis_host, redis_port)
 	client := redis.NewClient(&redis.Options{
 		Addr:     redis_addr,
 		Password: redis_pass,
@@ -31,7 +43,7 @@ func RedisConnection() *redis.Client {
 	if err != nil {
 		log.Println(err)
 	}
-	fmt.Print(pong)
+	fmt.Println(pong)
 	return client
 }
 
